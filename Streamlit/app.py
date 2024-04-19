@@ -137,16 +137,14 @@ elif option == 'Summarizer':
                                         chunk_size = 1000, 
                                         chunk_overlap = 10, 
                                         length_function = len)
-        text = text_splitter.split_text(docs)
+        text = text_splitter.split_documents(docs)
 
         embedding_function = SentenceTransformerEmbeddings(model_name = "all-MiniLM-L6-v2")
 
-        vectordb = Chroma(persist_directory = "assets/chroma_db", embedding_function = embedding_function)
-
-        load_dotenv()
+        vectordb = Chroma.from_documents(documents = docs, embedding = OpenAIEmbeddings(openai_api_key = api_key))
 
         retriever = vectordb.as_retriever()
-        llm = OpenAI(temperature = 0.9)
+        llm = OpenAI(temperature = 0.9, openai_api_key = api_key)
 
         qa_chain = RetrievalQA.from_chain_type(llm = llm,
                                             chain_type = "stuff",
@@ -156,10 +154,5 @@ elif option == 'Summarizer':
 
         chain_result = qa_chain("Can you give me the summary")
         answer = chain_result["result"]
-        print(answer)
+        st.write(answer)
 
-# st.sidebar.markdown('---')
-
-# st.sidebar:
-#     api_key = st.text_input("Input your Open AI API key")
-#     uploaded_file = st.file_uploader("Upload your PDF file", type = ["pdf"])
