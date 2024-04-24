@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/made%20with-Python-blue.svg" alt="Made with Python">
-  <img src="https://img.shields.io/badge/made%20with-Python-blue.svg" alt="Made with Streamlit">
+  <img src="https://img.shields.io/badge/made%20with-Streamlit-orange.svg" alt="Made with Streamlit">
 </p>
 
 ---
