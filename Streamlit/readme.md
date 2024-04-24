@@ -22,7 +22,7 @@ This repository contains a powerful web application built with Streamlit for per
 
 [![Watch the demo]()
 
-<h2 align="center">Let's Get Started! 🚀</h2>
+## <h2>Let's Get Started! 🚀</h2>
 
 1. Clone the repository:
 
