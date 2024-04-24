@@ -16,7 +16,7 @@ This repository contains a powerful web application built with Streamlit for per
 
 - **Question Answering (QnA):** Ask questions related to the uploaded PDF document, and the app will provide answers based on the content.
 - **Summarization:** Generate concise summaries of the uploaded PDF documents.
-- **Language**: 
+- **Language**: The language used is not limited to English only, but Indonesian can also be used to implement both features above. Other languages have not been tried due to the limitation of understood languages.
 
 ## Demo
 
