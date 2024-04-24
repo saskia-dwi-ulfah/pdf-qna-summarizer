@@ -3,7 +3,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/made%20with-Python-blue.svg" alt="Made with Python">
   <img src="https://img.shields.io/badge/made%20with-Streamlit-orange.svg" alt="Made with Streamlit">
-  <img src="https://img.shields.io/badge/made%20with-OpenAI's GPT-3.5-green.svg" alt="Made with OpenAI's GPT-3.5">
+  <img src="https://img.shields.io/badge/made%20with-OpenAI-green.svg" alt="Made with OpenAI's GPT-3.5">
 </p>
 
 ---
