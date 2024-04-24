@@ -20,7 +20,7 @@ This repository contains a powerful web application built with Streamlit for per
 
 ## Demo
 
-[![Watch the demo](streamlit.gif.gif)
+![Watch the demo](streamlit.gif.gif)
 
 ## <h2>Let's Get Started! 🚀</h2>
 
