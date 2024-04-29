@@ -13,36 +13,13 @@ from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
-
-import os
-import shutil
-import tempfile
-
-from utils.function import format_docs, display_how_to
-from utils.template import template
-
-from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
-from langchain_core.prompts import PromptTemplate
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import Chroma
-# from langchain_community.embeddings import HuggingFaceEmbeddings
-# from langchain.sentence_transformers import SentenceTransformer
 from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 from dotenv import load_dotenv
 from langchain import OpenAI
 from langchain.chains import RetrievalQA
 from langchain.chains.question_answering import load_qa_chain
-
-# @st.cache(allow_output_mutation=True)
-# def cached_function(input_list):
-#     # Modify the input list
-#     input_list.append()
-#     return input_list
 
 # Add a title to the sidebar
 with st.sidebar:
@@ -140,7 +117,7 @@ elif option == 'Summarizer':
         docs = loader.load()
 
         @st.cache_data
-        def coba():
+        def cache_summarizer():
             text_splitter = CharacterTextSplitter(separator = "\n", 
                                             chunk_size = 1000, 
                                             chunk_overlap = 10, 
@@ -163,10 +140,8 @@ elif option == 'Summarizer':
             chain_result = qa_chain("Can you give me the summary")
             answer = chain_result["result"]
 
-            # cached_result = cached_function(answer)
-
             st.write(answer)
-        coba()
+        cache_summarizer()
 
     else:
         st.write("Please upload a file to summarize.")
