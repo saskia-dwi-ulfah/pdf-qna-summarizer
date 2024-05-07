@@ -36,7 +36,8 @@ Articles
 Coursebooks
 ├── 📁 data_input
 ├── 📝 1_Basic_Python.ipynb
-└── 📝 2_PDF_QnA_Summarizer.ipynb
+├── 📝 2_PDF_QnA_Summarizer.ipynb
+└── ⚙️ requirements.txt
 ```
 
 - **Description**: Develop a PDF summarizer and question-answering system for coursebooks. This feature involves summarizing the content of PDF coursebooks and providing question-answering capabilities using various tools such as Python, Langchain, PyPDF, ChromaDB, and the OpenAI API.
