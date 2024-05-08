@@ -48,7 +48,7 @@ Coursebooks
   <img src="https://img.shields.io/badge/ChromaDB-gray.svg" alt="Made with Python">
 - **Use Case**: Students and educators can use this feature to quickly understand the key concepts covered in coursebooks and obtain answers to specific questions related to the material. For example: DSS, Corporate training, DDE.
 
-### 3. **Dashboard App**: 
+### 3. [Dashboard App](https://ask-summarize-pdf.streamlit.app/)
 
 ```
 Streamlit
