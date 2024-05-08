@@ -1,10 +1,6 @@
-import os
 import shutil
 import tempfile
 import streamlit as st
-
-from utils.function import format_docs, display_how_to
-from utils.template import template
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -12,65 +8,70 @@ from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnablePassthrough
-from langchain.text_splitter import CharacterTextSplitter
+from langchain_core.runnables import RunnablePassthrough 
 from langchain.vectorstores import Chroma
-from langchain.embeddings.sentence_transformer import SentenceTransformerEmbeddings
-from dotenv import load_dotenv
-from langchain import OpenAI
 from langchain.chains import RetrievalQA
-from langchain.chains.question_answering import load_qa_chain
 
-# Add a title to the sidebar
+from utils.function import format_docs, display_how_to
+from utils.template import template
+
+
+def process_file(uploaded_file, api_key):
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
+        shutil.copyfileobj(uploaded_file, tmpfile)
+        tmpfile_path = tmpfile.name
+
+    loader = PyPDFLoader(tmpfile_path, extract_images=False)
+    docs = loader.load()
+
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    splits = text_splitter.split_documents(docs)
+
+    vectorstore = Chroma.from_documents(documents=splits, embedding=OpenAIEmbeddings(openai_api_key=api_key))
+    return vectorstore
+
+def clear_all():
+    keys = list(st.session_state.keys())
+
+    for key in keys:
+        del st.session_state[key]
+
+
+
 with st.sidebar:
-
-    st.sidebar.title('Sidebar Selection')
-
+    st.sidebar.title('PDF Q&A and Summarizer')
     st.button("How to Use The App", on_click = display_how_to)
-
     st.sidebar.markdown('---')
-    
-    option = st.sidebar.selectbox(
-        'Choose Menu',
-        ('QnA', 'Summarizer')
-    )
-
-    st.sidebar.markdown('---')
-
     api_key = st.text_input("Input your Open AI API key")
 
-    st.sidebar.markdown('---')
+    print(st.session_state)
 
-    uploaded_file = st.file_uploader("Upload your PDF file", type = ["pdf"])
+    with st.spinner('Uploading your file...'):
+        uploaded_file = st.file_uploader("Upload your PDF file", type = ["pdf"], on_change = clear_all)
 
-# Display content based on the selected option
+    if uploaded_file is None: 
+        st.warning("Please upload your PDF file.")
+    else:
+        if 'vectorstore' not in st.session_state:
+            st.session_state['vectorstore'] = process_file(uploaded_file, api_key)
+
+        st.session_state['option'] = st.sidebar.selectbox(
+                                        'Choose Menu',
+                                        ('QnA', 'Summarizer')
+                                    )
     
-if option == 'QnA':
-    st.title("Ask The PDF 📑🔮🤔")
-    st.caption("Powered by Open AI GPT 3.5 Turbo")
+if 'vectorstore' in st.session_state:
+    # vectorstore = st.session_state.vectorstore
+    # option = st.session_state.option
 
-    if uploaded_file is not None: 
-        
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
-            # Copy the uploaded file to the temporary file
-            shutil.copyfileobj(uploaded_file, tmpfile)
-            tmpfile_path = tmpfile.name
+    # display content based on the selected option
+    if st.session_state.option == 'QnA':
+        st.title("Ask The PDF 📑🔮🤔")
+        st.caption("Powered by Open AI GPT 3.5 Turbo")
 
-        loader = PyPDFLoader(tmpfile_path, extract_images = False) # error when load rapidocr-onnxruntime
-        docs = loader.load()
-
-        # 2. Split
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size = 1000, chunk_overlap = 200)
-        splits = text_splitter.split_documents(docs)
-        
-        # 3. Save
-        vectorstore = Chroma.from_documents(documents = splits, 
-                                    embedding = OpenAIEmbeddings(openai_api_key = api_key))
-
-        # 4. Retrieve and generate 
-        retriever = vectorstore.as_retriever()
-        custom_rag_prompt = PromptTemplate.from_template(template)
+        retriever = st.session_state.vectorstore.as_retriever()
         llm = ChatOpenAI(model_name = 'gpt-3.5-turbo-0125', temperature = 0, openai_api_key = api_key)
+        custom_rag_prompt = PromptTemplate.from_template(template)
         rag_chain = (
             {"context": retriever | format_docs, "question": RunnablePassthrough()}
             | custom_rag_prompt
@@ -102,49 +103,40 @@ if option == 'QnA':
 
             st.session_state.messages.append({"role": "assistant", "content": response})
 
-elif option == 'Summarizer':
-    st.title("Summarize The PDF 📑🔮🤔")
-    st.caption("Powered by Open AI GPT 3.5 Turbo")
-    
-    
-    if uploaded_file is not None: 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
-            # Copy the uploaded file to the temporary file
-            shutil.copyfileobj(uploaded_file, tmpfile)
-            tmpfile_path = tmpfile.name
+    elif st.session_state.option == 'Summarizer':
+        retriever = st.session_state.vectorstore.as_retriever()
+        llm = ChatOpenAI(model_name = 'gpt-3.5-turbo-0125', temperature = 0, openai_api_key = api_key)
 
-        loader = PyPDFLoader(tmpfile_path, extract_images = False) # error when load rapidocr-onnxruntime
-        docs = loader.load()
+        st.title("Summarize The PDF 📑✍️")
+        st.caption("Powered by Open AI GPT 3.5 Turbo")
 
-        @st.cache_data
-        def cache_summarizer():
-            text_splitter = CharacterTextSplitter(separator = "\n", 
-                                            chunk_size = 1000, 
-                                            chunk_overlap = 10, 
-                                            length_function = len)
-            text = text_splitter.split_documents(docs)
+        qa_chain = RetrievalQA.from_chain_type(llm = llm,
+                                    chain_type = "stuff",
+                                    retriever = retriever,
+                                    return_source_documents = True,
+                                    verbose = False)
 
-            embedding_function = SentenceTransformerEmbeddings(model_name = "all-MiniLM-L6-v2")
+        chain_result = qa_chain("Give me the summary in general!")
+        answer = chain_result["result"]
 
-            vectordb = Chroma.from_documents(documents = docs, embedding = OpenAIEmbeddings(openai_api_key = api_key))
+        st.write(answer)
 
-            retriever = vectordb.as_retriever()
-            llm = OpenAI(temperature = 0.9, openai_api_key = api_key)
+        # @st.cache_data
+        # def cache_summarizer():
+        #     qa_chain = RetrievalQA.from_chain_type(llm = llm,
+        #                             chain_type = "stuff",
+        #                             retriever = retriever,
+        #                             return_source_documents = True,
+        #                             verbose = False)
 
-            qa_chain = RetrievalQA.from_chain_type(llm = llm,
-                                                chain_type = "stuff",
-                                                retriever = retriever,
-                                                return_source_documents = True,
-                                                verbose = False)
+        #     chain_result = qa_chain("Give me the summary in general!")
+        #     answer = chain_result["result"]
 
-            chain_result = qa_chain("Can you give me the summary")
-            answer = chain_result["result"]
+        #     st.write(answer)
 
-            st.write(answer)
-        cache_summarizer()
-
-    else:
-        st.write("Please upload a file to summarize.")
-
+        # cache_summarizer()
     
 
+
+
+    
