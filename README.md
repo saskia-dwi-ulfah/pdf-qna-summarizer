@@ -12,7 +12,7 @@ PDF is a common file format for storing digital documents, ranging from research
 
 ## Features
 
-### 1. **Articles**: 
+### 1. [Articles](https://github.com/saskia-dwi-ulfah/pdf-qna-summarizer/tree/main/Articles) 
 
 ```
 Articles
@@ -30,7 +30,7 @@ Articles
 
 - **Use Case**: Clients, students, or professionals who need to quickly retrieve specific information from lengthy PDF reports can benefit from this feature.
 
-### 2. **Coursebooks**: 
+### 2. [Coursebooks](https://github.com/saskia-dwi-ulfah/pdf-qna-summarizer/tree/main/Coursebooks)
 
 ```
 Coursebooks
